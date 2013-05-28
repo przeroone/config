@@ -1,0 +1,163 @@
+upstream alex_amoeba {
+  server unix:/home/alex.au/projects/amoeba/tmp/sockets/unicorn.sock;
+}
+
+upstream alex_cam {
+  server unix:/home/alex.au/projects/amoeba.cam/tmp/sockets/unicorn.sock;
+}
+
+upstream alex_ws {
+  server unix:/home/alex.au/projects/amoeba.ws/tmp/sockets/unicorn.sock;
+}
+
+upstream alex_satellite {
+  server unix:/home/alex.au/projects/satellite/tmp/sockets/unicorn.sock;
+}
+
+upstream alex_booking {
+  server 127.0.0.1:5000;
+}
+
+server {
+  listen 80;
+  server_name alex.202.85.197.200.xip.io;
+  proxy_read_timeout 900;
+
+  client_max_body_size 5M;
+  client_body_buffer_size 128k;
+
+  access_log /var/log/nginx/alex.au.access.log;
+  error_log  /var/log/nginx/alex.au.error.log;
+
+	location / {
+    rewrite ^ http://$host/amoeba break;
+	}
+
+  location /amoeba {
+    alias /home/alex.au/projects/amoeba/public;
+
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    if (-f $request_filename) { 
+      break; 
+    }
+
+    if (-f $request_filename/index.html) {
+      rewrite (.*) $1/index.html break;
+    }
+
+    if (-f $request_filename.html) {
+      rewrite (.*) $1.html break;
+    }
+
+    if (!-f $request_filename) {
+      proxy_pass http://alex_amoeba;
+      break;
+    }
+  }
+
+  location /cam {
+    alias /home/alex.au/projects/amoeba.cam/public;
+
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    if (-f $request_filename) { 
+      break;
+    }
+
+    if (-f $request_filename/index.html) {
+      rewrite (.*) $1/index.html break;
+    }
+
+    if (-f $request_filename.html) {
+      rewrite (.*) $1.html break;
+    }
+
+    if (!-f $request_filename) {
+      proxy_pass http://alex_cam;
+      break;
+    }
+  }
+
+  location /ws {
+    alias /home/alex.au/projects/amoeba.ws/public;
+
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    if (-f $request_filename) { 
+      break; 
+    }
+
+    if (-f $request_filename/index.html) {
+      rewrite (.*) $1/index.html break;
+    }
+
+    if (-f $request_filename.html) {
+      rewrite (.*) $1.html break;
+    }
+
+    if (!-f $request_filename) {
+      proxy_pass http://alex_ws;
+      break;
+    }
+  }
+
+  location /satellite {
+    alias /home/alex.au/projects/satellite/public;
+
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    if (-f $request_filename) { 
+      break; 
+    }
+
+    #if (-f $request_filename/index.html) {
+    #  rewrite (.*) $1/index.html break;
+    #}
+
+    #if (-f $request_filename.html) {
+    #  rewrite (.*) $1.html break;
+    #}
+
+    if (!-f $request_filename) {
+      proxy_pass http://alex_satellite;
+      break;
+    }
+  }
+
+  location /booking {
+    #alias /home/alex.au/projects/booking/test/dummy/public;
+    alias /home/fred.wong/projects/igshk/public;
+
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    if (-f $request_filename) { 
+      break;
+    }
+
+    if (!-f $request_filename) {
+      proxy_pass http://alex_booking;
+      break;
+    }
+  }
+}

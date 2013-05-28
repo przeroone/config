@@ -1,0 +1,33 @@
+" Basic
+let mapleader = ","
+
+"Switch between windows
+noremap <C-j> <C-W>j
+noremap <C-k> <C-W>k
+noremap <C-h> <C-W>h
+noremap <C-l> <C-W>l
+
+" Easy escape
+imap jj <ESC>
+
+" Buffer
+map <S-m> :bn<CR>
+map <S-n> :bp<CR>
+nmap <leader>d :bw<CR>
+
+" Disable plugins
+call janus#disable_plugin('nerdcommenter')
+call janus#disable_plugin('buffergator')
+
+" Tcomment
+nnoremap // :TComment<CR>
+vnoremap // :TComment<CR>
+
+" NERDTree
+let g:NERDChristmasTree = 1
+let g:NERDTreeDirArrows = 1
+" let g:NERDTreeQuitOnOpen = 1
+let g:NERDTreeShowHidden = 1
+
+" DelimitMate
+imap <C-f> <Plug>delimitMateS-Tab

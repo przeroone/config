@@ -1,0 +1,50 @@
+[core]
+	editor = vim
+[user]
+	name = Alex Au
+	email = alex.au@athenabest.com
+[color]
+  diff = auto
+  status = auto
+        branch = auto
+        interactive = auto
+        ui = true
+        pager = true
+
+[color "branch"]
+        current = yellow reverse
+        local = yellow
+        remote = green
+
+[color "diff"]
+        meta = yellow bold
+        frag = magenta bold
+        old = red bold
+        new = green bold
+
+[color "status"]
+        added = yellow
+        changed = green
+        untracked = cyan
+
+[core]
+        pager = less -FRSX
+        whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	autocrlf = false
+
+[alias]
+	st = status
+	ci = commit
+        co = checkout
+	w = whatchanged
+[giggle]
+	main-window-maximized = false
+	main-window-geometry = 1215x868+0+38
+	history-view-vpane-position = 357
+	file-view-vpane-position = 799
+	main-window-view = FileView
+	file-view-hpane-position = 359
+[dude]
+	interval = 600
+[push]
+	default = simple

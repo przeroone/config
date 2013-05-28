@@ -1,0 +1,24 @@
+Host 3620A
+HostName 3620A
+User athenabest
+
+Host 3620B
+HostName 3620B
+User athenabest
+
+Host 3620C
+HostName 3620C
+User athenabest
+
+Host 7945A
+HostName 7945A
+User abagile
+
+Host amoeba
+HostName amoeba.athenabest.com
+User amoeba
+Port 6188
+
+Host abagile
+HostName abagile
+User abagile
