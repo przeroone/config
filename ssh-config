@@ -1,12 +1,12 @@
-Host 3620A
+Host A
 HostName 3620A
 User athenabest
 
-Host 3620B
+Host B
 HostName 3620B
 User athenabest
 
-Host 3620C
+Host C
 HostName 3620C
 User athenabest
 
