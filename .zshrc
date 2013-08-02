@@ -68,6 +68,8 @@ p() {
     cd ~/projects/$1
   fi
 }
+_p() { _files -W ~/projects -/; }
+compdef _p p
 
 # Git
 alias ga="git add ."
