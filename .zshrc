@@ -52,12 +52,22 @@ export RUBY_GC_MALLOC_LIMIT=60000000
 export RUBY_FREE_MIN=200000
 
 # Project
-alias amoeba="cd ~/projects/amoeba"
-alias cam="cd ~/projects/amoeba.cam"
-alias ws="cd ~/projects/amoeba.ws"
-alias igs="cd ~/projects/igs"
-alias sat="cd ~/projects/satellite"
-alias booking="cd ~/projects/booking"
+# alias amoeba="cd ~/projects/amoeba"
+# alias cam="cd ~/projects/amoeba.cam"
+# alias ws="cd ~/projects/amoeba.ws"
+# alias igs="cd ~/projects/igs"
+# alias igshk="cd ~/projects/igshk"
+# alias sat="cd ~/projects/satellite"
+# alias booking="cd ~/projects/booking"
+
+p() {
+  if [ -z "$1" ]
+  then
+    echo "No project input"
+  else
+    cd ~/projects/$1
+  fi
+}
 
 # Git
 alias ga="git add ."
@@ -79,19 +89,30 @@ restore_db () {
   echo -n "Which date? (yyyymmdd) "
   read INPUT
   d=$INPUT[0,4]_$INPUT[5,6]_$INPUT[7,8]
-  scp 3620A:~/db_backups/amoeba-$d"_0200" ~/documents
+  scp A:~/db_backups/amoeba-$d"_0200" ~/documents
   pg_restore -h localhost -p 5435 -U amoeba -d amoeba_development -c -O ~/documents/amoeba-$d"_0200"
   rm ~/documents/amoeba-$d"_0200"
 }
 
 rld () {
-  echo -n "AFS? "
-  read INPUT
-  if [[ $INPUT =~ "y|Y|yes|Yes" ]]; then
-    pg_dump -c -h 3620C -p 5433 -T fund_prices -T snapshot_portfolios -T email_clients -w -U athenabest amoeba | psql
-    pg_dump -c -h 3620C -p 5433 -s -t fund_prices -t snapshot_portfolios -t email_clients -w -U athenabest amoeba | psql
+  if [ -z "$1" ]
+  then
+    echo "No site input"
   else
-    ssh 7945A pg_dump -O -c -T fund_prices -T snapshot_portfolios amoeba | psql
+    case $1 in
+    "afs")
+      pg_dump -c -h 3620C -p 5433 -T fund_prices -T snapshot_portfolios -T email_clients -w -U athenabest amoeba | psql
+      pg_dump -c -h 3620C -p 5433 -s -t fund_prices -t snapshot_portfolios -t email_clients -w -U athenabest amoeba | psql
+      ;;
+    "scwm")
+      ssh 7945A pg_dump -O -c -T fund_prices -T snapshot_portfolios -T email_clients -w -U abagile amoeba | psql
+      ssh 7945A pg_dump -O -c -s -t fund_prices -t snapshot_portfolios -t email_clients -w -U abagile amoeba | psql
+      ;;
+    "gswm")
+      ssh 7945A pg_dump -O -c -p 5433 -T fund_prices -T snapshot_portfolios -T email_clients -w -U abagile amoeba | psql
+      ssh 7945A pg_dump -O -c -p 5433 -s -t fund_prices -t snapshot_portfolios -t email_clients -w -U abagile amoeba | psql
+      ;;
+    esac
   fi
 }
 
@@ -99,11 +120,56 @@ alias sat_db="ssh 3620A pg_dump -O -c satellite | psql satellite"
 alias revenue_import="rails runner \"Import::RevenueFile.perform('live')\""
 
 # Server
-alias amoeba_server="RAILS_RELATIVE_URL_ROOT='/amoeba' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba/config/unicorn.rb -D $*"
-alias cam_server="RAILS_RELATIVE_URL_ROOT='/cam' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba.cam/config/unicorn.rb -D $*"
-alias ws_server="RAILS_RELATIVE_URL_ROOT='/ws' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba.ws/config/unicorn.rb -D $*"
-alias satellite_server_start="RAILS_RELATIVE_URL_ROOT='/satellite' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/satellite/config/unicorn.rb -D $*"
+# alias amoeba_server="RAILS_RELATIVE_URL_ROOT='/amoeba' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba/config/unicorn.rb -D $*"
+# alias cam_server="RAILS_RELATIVE_URL_ROOT='/cam' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba.cam/config/unicorn.rb -D $*"
+# alias ws_server="RAILS_RELATIVE_URL_ROOT='/ws' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba.ws/config/unicorn.rb -D $*"
+# alias satellite_server_start="RAILS_RELATIVE_URL_ROOT='/satellite' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/satellite/config/unicorn.rb -D $*"
+# alias igshk_server="RAILS_RELATIVE_URL_ROOT='/ail_rails' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/igshk/config/unicorn.rb -D $*"
 alias booking_server="RAILS_RELATIVE_URL_ROOT='/booking' rails server -p 5000 -d"
+
+ds() {
+  if [ -f "./tmp/pids/unicorn.pid" ]
+  then
+    kill `cat ./tmp/pids/unicorn.pid`
+    echo "Server is brought to down"
+  else
+    echo "Server is not up"
+  fi
+}
+
+us() {
+  current_directory=`pwd | sed 's!.*/!!'`
+  case $current_directory in
+    amoeba.cam)
+      root=cam
+      ;;
+    amoeba.ws)
+      root=ws
+      ;;
+    igshk)
+      root=ail_rails
+      ;;
+    *)
+      root=$current_directory
+  esac
+  RAILS_RELATIVE_URL_ROOT=/$root RAILS_ENV=development bundle exec unicorn -c `pwd`/config/unicorn.rb -D $*
+  echo "Server is brought to up"
+}
+
+alias rs="ds && us"
+
+ss() {
+  if [ -z "$1" ]
+  then
+    echo "No site input"
+  else
+    echo "Switching amoeba to $1"
+    ds
+    rld $1
+    thor setup:site $1
+    us
+  fi
+}
 
 # Deployment
 hotfiz() {
