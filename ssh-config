@@ -22,3 +22,7 @@ Port 6188
 Host abagile
 HostName abagile
 User abagile
+
+Host ail
+HostName ail
+User abagile

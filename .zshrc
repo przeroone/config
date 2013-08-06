@@ -80,6 +80,9 @@ alias gl="git log --graph --pretty=\"format:%C(yellow)%h%Cblue%d%Creset %s %C(gr
 alias gb="git branch -a"
 alias gst="git stash"
 alias gstp="git stash pop"
+#vac () {
+#  vim `git status | grep modified | awk '{print $3}'`
+#}
 
 # DB
 alias fetch_db="scp amoeba:~/deploy/db_backups/amoeba-$(date +%Y)_$(date +%m)_$(date +%d)_0200 ~/projects/dbs/"
@@ -99,7 +102,7 @@ restore_db () {
 rld () {
   if [ -z "$1" ]
   then
-    echo "No site input"
+    echo "No argument"
   else
     case $1 in
     "afs")
@@ -114,12 +117,17 @@ rld () {
       ssh 7945A pg_dump -O -c -p 5433 -T fund_prices -T snapshot_portfolios -T email_clients -w -U abagile amoeba | psql
       ssh 7945A pg_dump -O -c -p 5433 -s -t fund_prices -t snapshot_portfolios -t email_clients -w -U abagile amoeba | psql
       ;;
+    "satellite")
+      ssh A pg_dump -O -c satellite | psql satellite
+      ;;
+    "igshk")
+      ssh ail pg_dump -O -c igshk | psql igs_development
+      ;;
     esac
   fi
 }
 
-alias sat_db="ssh 3620A pg_dump -O -c satellite | psql satellite"
-alias revenue_import="rails runner \"Import::RevenueFile.perform('live')\""
+# alias revenue_import="rails runner \"Import::RevenueFile.perform('live')\""
 
 # Server
 # alias amoeba_server="RAILS_RELATIVE_URL_ROOT='/amoeba' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba/config/unicorn.rb -D $*"
@@ -127,7 +135,7 @@ alias revenue_import="rails runner \"Import::RevenueFile.perform('live')\""
 # alias ws_server="RAILS_RELATIVE_URL_ROOT='/ws' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/amoeba.ws/config/unicorn.rb -D $*"
 # alias satellite_server_start="RAILS_RELATIVE_URL_ROOT='/satellite' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/satellite/config/unicorn.rb -D $*"
 # alias igshk_server="RAILS_RELATIVE_URL_ROOT='/ail_rails' RAILS_ENV='development' bundle exec unicorn -c /home/alex.au/projects/igshk/config/unicorn.rb -D $*"
-alias booking_server="RAILS_RELATIVE_URL_ROOT='/booking' rails server -p 5000 -d"
+# alias booking_server="RAILS_RELATIVE_URL_ROOT='/booking' rails server -p 5000 -d"
 
 ds() {
   if [ -f "./tmp/pids/unicorn.pid" ]
@@ -163,7 +171,7 @@ alias rs="ds && us"
 ss() {
   if [ -z "$1" ]
   then
-    echo "No site input"
+    echo "No argument"
   else
     echo "Switching amoeba to $1"
     ds
@@ -172,6 +180,9 @@ ss() {
     us
   fi
 }
+
+# Short cut
+alias cl="cat /dev/null > log/development.log"
 
 # Deployment
 hotfiz() {
